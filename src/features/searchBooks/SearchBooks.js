@@ -17,6 +17,12 @@ class SearchBooks extends Component {
     const { fetchBooks } = this.props;
     fetchBooks(query);
   };
+  
+  getDefaultSelected = book => {
+    const { booksPosition } = this.props;
+    const bookPosition = booksPosition.get(book.get('id'));
+    return bookPosition ? bookPosition : 'none';
+  };
 
   renderBooks = () => {
     const { query } = this.state;
@@ -37,7 +43,7 @@ class SearchBooks extends Component {
               book={book}
               key={book.get('id')}
               addBookTo={row => addBookTo(row, book)}
-              defaultSelected={'none'}
+              defaultSelected={this.getDefaultSelected(book)}
             />
           ))
           .toArray()}
@@ -81,6 +87,7 @@ function mapStateToProps({ books }) {
     wantToReadBooks: books.get('wantToReadBooks'),
     currentlyReadingBooks: books.get('currentlyReadingBooks'),
     readBooks: books.get('readBooks'),
+    booksPosition: books.get('booksPosition')
   };
 }
 

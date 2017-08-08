@@ -40,5 +40,6 @@ export function addBookTo (row, book) {
   return {
     type,
     book,
+    row,
   };
 }
