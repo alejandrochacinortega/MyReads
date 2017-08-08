@@ -1,64 +1,91 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-import * as BooksAPI from '../../BooksAPI'
-import SingleBook from './components/SingleBook';
+import SingleBook from '../../components/SingleBook';
 import '../../App.css';
+import { connect } from 'react-redux';
+import { fetchBooks, addBookTo, resetFetchBooks } from '../../actions/index';
 
 class SearchBooks extends Component {
   state = {
     query: '',
-    books: null
   };
-  
-  constructor (props) {
-    super(props);
-  }
-  
+
   onSubmitForm = event => {
-    const { query } = this.state;
     event.preventDefault();
-    BooksAPI
-      .search(query, 20)
-      .then(books => this.setState({ books }))
+    const { query } = this.state;
+    const { fetchBooks } = this.props;
+    fetchBooks(query);
   };
-  
+
   renderBooks = () => {
-    const { books } = this.state;
+    const { query } = this.state;
+    const {
+      addBookTo,
+      searchBooks,
+    } = this.props;
+
+    if (searchBooks.get('error')) {
+      return <div><h1>No results for {query} - </h1></div>;
+    }
+
     return (
       <ol className="books-grid">
-        {books.map(book => <SingleBook book={book} key={book.title} />)}
+        {searchBooks
+          .map(book => (
+            <SingleBook
+              book={book}
+              key={book.get('id')}
+              addBookTo={row => addBookTo(row, book)}
+              defaultSelected={'none'}
+            />
+          ))
+          .toArray()}
       </ol>
-    )
+    );
   };
-  
+
   render() {
-    const { query, books } = this.state;
+    const { query } = this.state;
+    const { searchBooks, resetFetchBooks } = this.props;
     return (
       <div className="search-books">
         <div className="search-books-bar">
-          <Link to="/" className="close-search">
-          </Link>
+          <Link
+            to="/"
+            className="close-search"
+            onClick={() => resetFetchBooks()}
+          />
           <div className="search-books-input-wrapper">
-            {/*
-             NOTES: The search from BooksAPI is limited to a particular set of search terms.
-             You can find these search terms here:
-             https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-         
-             However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-             you don't find a specific author or title. Every search is limited by search terms.
-             */}
             <form onSubmit={this.onSubmitForm}>
-              <input type="text" value={query} placeholder="Search by title or author" onChange={event => this.setState({ query: event.target.value})} />
+              <input
+                type="text"
+                value={query}
+                placeholder="Search by title or author"
+                onChange={event => this.setState({ query: event.target.value })}
+              />
             </form>
           </div>
         </div>
         <div className="search-books-results">
-          { books && this.renderBooks()}
+          {searchBooks.size > 0 && this.renderBooks()}
         </div>
       </div>
     );
   }
 }
 
-export default SearchBooks;
+function mapStateToProps({ books }) {
+  return {
+    searchBooks: books.get('searchBooks'),
+    wantToReadBooks: books.get('wantToReadBooks'),
+    currentlyReadingBooks: books.get('currentlyReadingBooks'),
+    readBooks: books.get('readBooks'),
+  };
+}
+
+export default connect(mapStateToProps, {
+  fetchBooks,
+  addBookTo,
+  resetFetchBooks,
+})(SearchBooks);
