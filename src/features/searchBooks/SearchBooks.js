@@ -1,38 +1,55 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { RingLoader } from 'halogen';
 
 import SingleBook from '../../components/SingleBook';
 import '../../App.css';
+import '../../index.css';
 import { connect } from 'react-redux';
 import { fetchBooks, addBookTo, resetFetchBooks } from '../../actions/index';
 
 class SearchBooks extends Component {
   state = {
     query: '',
+    isFetchingData: false,
+    finalSearch: '',
   };
 
   onSubmitForm = event => {
     event.preventDefault();
-    const { query } = this.state;
+    const { query, finalSearch } = this.state;
     const { fetchBooks } = this.props;
-    fetchBooks(query);
+    if (query.length === 0) {
+      alert('Oppps...Search seems to be empty. You can try to search for HTML');
+      return;
+    }
+    this.setState({ isFetchingData: true, finalSearch: query });
+    fetchBooks(query).then(() => this.setState({ isFetchingData: false }));
   };
-  
+
   getDefaultSelected = book => {
     const { booksPosition } = this.props;
     const bookPosition = booksPosition.get(book.get('id'));
     return bookPosition ? bookPosition : 'none';
   };
-
+  
   renderBooks = () => {
-    const { query } = this.state;
+    const { finalSearch } = this.state;
     const {
       addBookTo,
       searchBooks,
     } = this.props;
 
     if (searchBooks.get('error')) {
-      return <div><h1>No results for {query} - </h1></div>;
+      return (
+        <div style={{ color: '#26a65b' }}>
+          <h2>
+            {
+              `No results for '${finalSearch}' :( But wait... How about some HTML knowledge? Search HTML`
+            }
+          </h2>
+        </div>
+      );
     }
 
     return (
@@ -52,8 +69,17 @@ class SearchBooks extends Component {
   };
 
   render() {
-    const { query } = this.state;
+    const { query, isFetchingData } = this.state;
     const { searchBooks, resetFetchBooks } = this.props;
+
+    if (isFetchingData) {
+      return (
+        <div className="center-text">
+          <RingLoader color="#26a65b" size="96px" margin="4px" />;
+        </div>
+      );
+    }
+
     return (
       <div className="search-books">
         <div className="search-books-bar">
@@ -87,7 +113,7 @@ function mapStateToProps({ books }) {
     wantToReadBooks: books.get('wantToReadBooks'),
     currentlyReadingBooks: books.get('currentlyReadingBooks'),
     readBooks: books.get('readBooks'),
-    booksPosition: books.get('booksPosition')
+    booksPosition: books.get('booksPosition'),
   };
 }
 
