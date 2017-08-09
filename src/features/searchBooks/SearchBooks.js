@@ -14,7 +14,13 @@ class SearchBooks extends Component {
     isFetchingData: false,
     finalSearch: '',
   };
-
+  
+  /**
+   * @description Submit search
+   * @constructor
+   * @param event of the form
+   * @returns
+   */
   onSubmitForm = event => {
     event.preventDefault();
     const { query, finalSearch } = this.state;
@@ -26,13 +32,25 @@ class SearchBooks extends Component {
     this.setState({ isFetchingData: true, finalSearch: query });
     fetchBooks(query).then(() => this.setState({ isFetchingData: false }));
   };
-
+  
+  /**
+   * @description Set the select default value for book
+   * @constructor
+   * @param {Map} book - Immutable Map of the book
+   * @returns {string} Select value for the book
+   */
   getDefaultSelected = book => {
     const { booksPosition } = this.props;
     const bookPosition = booksPosition.get(book.get('id'));
     return bookPosition ? bookPosition : 'none';
   };
   
+  /**
+   * @description Render books from the search
+   * @constructor
+   * @param none
+   * @returns XML
+   */
   renderBooks = () => {
     const { finalSearch } = this.state;
     const {
