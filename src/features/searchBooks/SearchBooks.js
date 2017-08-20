@@ -30,8 +30,9 @@ class SearchBooks extends Component {
       return;
     }
     this.setState({ isFetchingData: true, finalSearch: query });
-    fetchBooks(query);
-    setTimeout(() => this.setState({ isFetchingData: false  }), 2000)
+    fetchBooks(query, () => {
+      this.setState({ isFetchingData: false })
+    });
   };
   
   /**

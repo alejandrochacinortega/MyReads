@@ -23,13 +23,15 @@ function* getAllBooks() {
   }
 }
 
-function* fetchBooks({ query }) {
+function* fetchBooks({ query, callback }) {
   const books = yield BooksAPI.search(query, 20);
   try {
     yield put({type: SEARCH_BOOKS_SUCCESS, payload: books});
+    callback();
   } catch (e) {
     yield put({type: "USER_FETCH_FAILED", message: e.message});
   }
+  
 }
 
 function* updateBook({ book, shelf }) {

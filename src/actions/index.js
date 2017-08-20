@@ -12,10 +12,11 @@ export const GET_ALL_BOOKS_SUCCESS = 'GET_ALL_BOOKS_SUCCESS';
 export const BOOK_UPDATED = 'BOOK_UPDATED';
 export const BOOK_UPDATED_SUCCESS = 'BOOK_UPDATED_SUCCESS';
 
-export function fetchBooks (query) {
+export function fetchBooks (query, callback) {
   return {
     type: SEARCH_BOOKS,
-    query
+    query,
+    callback,
   }
 }
 
