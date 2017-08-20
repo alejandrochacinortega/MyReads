@@ -6,7 +6,7 @@ import SingleBook from '../../components/SingleBook';
 import '../../App.css';
 import '../../index.css';
 import { connect } from 'react-redux';
-import { fetchBooks, addBookTo, resetFetchBooks } from '../../actions/index';
+import { fetchBooks, addBookTo, resetFetchBooks, updateBook } from '../../actions/index';
 
 class SearchBooks extends Component {
   state = {
@@ -23,14 +23,15 @@ class SearchBooks extends Component {
    */
   onSubmitForm = event => {
     event.preventDefault();
-    const { query, finalSearch } = this.state;
+    const { query } = this.state;
     const { fetchBooks } = this.props;
     if (query.length === 0) {
       alert('Oppps...Search seems to be empty. You can try to search for HTML');
       return;
     }
     this.setState({ isFetchingData: true, finalSearch: query });
-    fetchBooks(query).then(() => this.setState({ isFetchingData: false }));
+    fetchBooks(query);
+    setTimeout(() => this.setState({ isFetchingData: false  }), 2000)
   };
   
   /**
@@ -40,9 +41,14 @@ class SearchBooks extends Component {
    * @returns {string} Select value for the book
    */
   getDefaultSelected = book => {
-    const { booksPosition } = this.props;
-    const bookPosition = booksPosition.get(book.get('id'));
-    return bookPosition ? bookPosition : 'none';
+    const { allBooks } = this.props;
+    const bookSaved = allBooks.find(b => b.get('id') === book.get('id'));
+    return bookSaved ? bookSaved.get('shelf') : 'none';
+  };
+  
+  addToShelf = (book, shelf) => {
+    const { updateBook } = this.props;
+    updateBook(book, shelf)
   };
   
   /**
@@ -54,7 +60,6 @@ class SearchBooks extends Component {
   renderBooks = () => {
     const { finalSearch } = this.state;
     const {
-      addBookTo,
       searchBooks,
     } = this.props;
 
@@ -69,7 +74,7 @@ class SearchBooks extends Component {
         </div>
       );
     }
-
+    
     return (
       <ol className="books-grid">
         {searchBooks
@@ -77,7 +82,7 @@ class SearchBooks extends Component {
             <SingleBook
               book={book}
               key={book.get('id')}
-              addBookTo={row => addBookTo(row, book)}
+              addBookTo={row => this.addToShelf(book.toJS(), row)}
               defaultSelected={this.getDefaultSelected(book)}
             />
           ))
@@ -89,7 +94,6 @@ class SearchBooks extends Component {
   render() {
     const { query, isFetchingData } = this.state;
     const { searchBooks, resetFetchBooks } = this.props;
-
     if (isFetchingData) {
       return (
         <div className="center-text">
@@ -132,6 +136,7 @@ function mapStateToProps({ books }) {
     currentlyReadingBooks: books.get('currentlyReadingBooks'),
     readBooks: books.get('readBooks'),
     booksPosition: books.get('booksPosition'),
+    allBooks: books.get('allBooks'),
   };
 }
 
@@ -139,4 +144,5 @@ export default connect(mapStateToProps, {
   fetchBooks,
   addBookTo,
   resetFetchBooks,
+  updateBook,
 })(SearchBooks);
