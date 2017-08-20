@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { RingLoader } from 'halogen';
+import _ from 'lodash';
 
 import SingleBook from '../../components/SingleBook';
 import '../../App.css';
@@ -21,8 +22,7 @@ class SearchBooks extends Component {
    * @param event of the form
    * @returns
    */
-  onSubmitForm = event => {
-    event.preventDefault();
+  onSubmitForm = () => {
     const { query } = this.state;
     const { fetchBooks } = this.props;
     if (query.length === 0) {
@@ -91,6 +91,13 @@ class SearchBooks extends Component {
       </ol>
     );
   };
+  
+  search = _.debounce(event => this.onSubmitForm(event), 500);
+  
+  onChangeInput = event => {
+    this.search(event);
+    this.setState({ query: event.target.value })
+  };
 
   render() {
     const { query, isFetchingData } = this.state;
@@ -117,7 +124,7 @@ class SearchBooks extends Component {
                 type="text"
                 value={query}
                 placeholder="Search by title or author"
-                onChange={event => this.setState({ query: event.target.value })}
+                onChange={event => this.onChangeInput(event)}
               />
             </form>
           </div>
@@ -133,9 +140,6 @@ class SearchBooks extends Component {
 function mapStateToProps({ books }) {
   return {
     searchBooks: books.get('searchBooks'),
-    wantToReadBooks: books.get('wantToReadBooks'),
-    currentlyReadingBooks: books.get('currentlyReadingBooks'),
-    readBooks: books.get('readBooks'),
     booksPosition: books.get('booksPosition'),
     allBooks: books.get('allBooks'),
   };
