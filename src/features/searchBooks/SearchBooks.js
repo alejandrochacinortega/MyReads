@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { RingLoader } from 'halogen';
 import _ from 'lodash';
+import { List } from 'immutable';
 
 import SingleBook from '../../components/SingleBook';
 import '../../App.css';
@@ -14,6 +15,7 @@ class SearchBooks extends Component {
     query: '',
     isFetchingData: false,
     finalSearch: '',
+    searchBooks: this.props.searchBooks,
   };
   
   /**
@@ -26,8 +28,8 @@ class SearchBooks extends Component {
     const { query } = this.state;
     const { fetchBooks } = this.props;
     if (query.length === 0) {
-      alert('Oppps...Search seems to be empty. You can try to search for HTML');
-      return;
+      this.setState({ searchBooks: List() })
+      return
     }
     this.setState({ isFetchingData: true, finalSearch: query });
     fetchBooks(query, () => {
@@ -62,7 +64,7 @@ class SearchBooks extends Component {
     const { finalSearch } = this.state;
     const {
       searchBooks,
-    } = this.props;
+    } = this.state;
 
     if (searchBooks.get('error')) {
       return (
@@ -98,10 +100,21 @@ class SearchBooks extends Component {
     this.search(event);
     this.setState({ query: event.target.value })
   };
+  
+  componentWillMount() {
+    
+  }
+  
+  componentWillReceiveProps(nextProps) {
+    console.log(' nextProps ', nextProps);
+    this.setState({ searchBooks: nextProps.searchBooks})
+  }
 
   render() {
     const { query, isFetchingData } = this.state;
-    const { searchBooks, resetFetchBooks } = this.props;
+    const { resetFetchBooks } = this.props;
+    const { searchBooks } = this.state;
+    console.log(' search books  ', searchBooks);
     if (isFetchingData) {
       return (
         <div className="center-text">

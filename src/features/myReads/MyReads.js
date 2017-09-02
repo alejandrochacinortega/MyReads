@@ -143,9 +143,6 @@ class MyReads extends Component {
 
 function mapStateToProps({ books }) {
   return {
-    wantToReadBooks: books.get('wantToReadBooks'),
-    currentlyReadingBooks: books.get('currentlyReadingBooks'),
-    readBooks: books.get('readBooks'),
     allBooks: books.get('allBooks'),
     booksPosition: books.get('booksPosition'),
     allBooksId: books.get('allBooksId'),
